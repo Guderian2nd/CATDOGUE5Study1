@@ -5,16 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "InputActionValue.h"
-#include "MyRacingPlayerController.generated.h"
+#include "MyRacingPlayerControllerBase.generated.h"
 
-class UInputMappingContext;
-class UInputAction;
-class ARacingPawn;
 /**
  * 
  */
 UCLASS()
-class SAMPLEPROJECT1_API AMyRacingPlayerController : public APlayerController
+class SAMPLEPROJECT1_API AMyRacingPlayerControllerBase : public APlayerController
 {
 	GENERATED_BODY()
 	
@@ -24,13 +21,22 @@ public:
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
 
-	/**
-	UPROPERTY(EditAnywhere, BluepringReadWrite, Category = "Pawn")
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION(BlueprintCallable, Category = "Provide Pawn with Info")
+	FVector2D GetBodyScreenPos(UStaticMeshComponent* BodyPawn);
+
+	UFUNCTION(BlueprintCallable, Category = "Provide Pawn with Info")
+	FVector2D GetMousePosXYDelta();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pawn")
 	/// <summary>
 	/// Object reference to Racing pawn. Null when not possessed.
 	/// </summary>
-	ARacingPawn* RacingPawn = nullptr;
-	//*/
+	class ARacingPawn* RacingPawn = nullptr;
+
+	void log();
 
 private:
 	UFUNCTION(BlueprintCallable, Category = "Inputs to Pawn")
@@ -40,7 +46,7 @@ private:
 	void CameraTurn(const FInputActionValue& Value);
 
 	UFUNCTION(BlueprintCallable, Category = "Inputs to Pawn")
-	void CameraZoon(const FInputActionValue& Value);
+	void CameraZoom(const FInputActionValue& Value);
 
 	//UFUNCTION(BlueprintCallable, Category = "Inputs to Pawn")
 	//void MouseMovement(const FInputActionValue& Value);
@@ -52,18 +58,17 @@ private:
 	class UInputMappingContext* InputContext;
 
 	UPROPERTY(VisibleAnywhere, Category = "Enhanced Input")
+	class UEnhancedInputComponent* EnhancedInputComp;
+
+	UPROPERTY(EditAnywhere, Category = "Enhanced Input")
 	class UInputAction* AccelerateAction;
 
-	UPROPERTY(VisibleAnywhere, Category = "Enhanced Input")
-	class UInputAction* CameraTurnAction;
+	UPROPERTY(EditAnywhere, Category = "Enhanced Input")
+	UInputAction* CameraTurnAction;
 
-	UPROPERTY(VisibleAnywhere, Category = "Enhanced Input")
-	class UInputAction* CameraZoomAction;
+	UPROPERTY(EditAnywhere, Category = "Enhanced Input")
+	UInputAction* CameraZoomAction;
 
-	UPROPERTY(VisibleAnywhere, Category = "Enhanced Input")
-	class UInputAction* MouseMovementAction;
-
-	FVector2D MouseScreenPosXY = { 0, 0 };
-
-
+	UPROPERTY(EditAnywhere, Category = "Enhanced Input")
+	UInputAction* MouseMovementAction;
 };
