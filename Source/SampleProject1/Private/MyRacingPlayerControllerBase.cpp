@@ -60,10 +60,11 @@ void AMyRacingPlayerControllerBase::Tick(float DeltaTime)
 		float MouseX, MouseY = 0.0f;
 		GetMousePosition(MouseX, MouseY);
 		FVector2D ViewPortSizeVec = { 0, 0 };
-		GetLocalPlayer()->ViewportClient->GetViewportSize(ViewPortSizeVec);
-		RacingPawn->SetAccelerateVector(FVector2D(MouseX, ViewPortSizeVec.Y - MouseY));
 		
+		GetLocalPlayer()->ViewportClient->GetViewportSize(ViewPortSizeVec);
+
 		RacingPawn->SetBodyScreenPos(GetBodyScreenPos(RacingPawn->PawnBody));
+		RacingPawn->SetAccelerateVector(FVector2D(MouseX, ViewPortSizeVec.Y - MouseY));
 	}
 }
 

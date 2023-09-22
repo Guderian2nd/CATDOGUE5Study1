@@ -19,9 +19,12 @@ public:
 	void AcceleratePawn(bool TurnOnAcceleration);
 	virtual void AcceleratePawn_Implementation(bool TurnOnAcceleration);
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Pawn Movement")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Arrow Movement")
 	void SetAccelerateVector(FVector2D MouseScreenPos);
 	virtual void SetAccelerateVector_Implementation(FVector2D MouseScreenPos);
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Arrow Movement")
+	void SetArrowColor(bool ArrowActive);
 
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Camera Movement")
@@ -38,7 +41,8 @@ public:
 		USceneComponent* RootComp, 
 		UCameraComponent* PawnCameraComp, 
 		USpringArmComponent* CameraArmComp, 
-		UStaticMeshComponent* PawnBodyComp
+		UStaticMeshComponent* PawnBodyComp,
+		USceneComponent* VectorMeshComp
 	);
 
 	UFUNCTION(BlueprintCallable, Category = "Initialization")
@@ -50,29 +54,35 @@ public:
 	// Called to bind functionality to input
 	// virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enhanced Input")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pawn Components")
 	/// <summary>
 	/// Root Component of this Pawn
 	/// </summary>
 	USceneComponent* Root;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enhanced Input")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pawn Components")
 	/// <summary>
 	/// Camera of this RacingPawn
 	/// </summary>
 	UCameraComponent* PawnCamera;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enhanced Input")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pawn Components")
 	/// <summary>
 	/// Camera Spring Arm of this RacingPawn
 	/// </summary>
 	USpringArmComponent* CameraArm;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enhanced Input")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pawn Components")
 	/// <summary>
 	/// Body StaticMesh of this Pawn
 	/// </summary>
 	UStaticMeshComponent* PawnBody;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pawn Components")
+	/// <summary>
+	/// Body StaticMesh of this Pawn
+	/// </summary>
+	USceneComponent* VectorMesh;
 
 protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Pawn Movement")

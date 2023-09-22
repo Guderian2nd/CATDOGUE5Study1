@@ -18,11 +18,18 @@ ARacingPawn::ARacingPawn()
 void ARacingPawn::AcceleratePawn_Implementation(bool TurnOnAcceleration)
 {
 	IsAccelerating = TurnOnAcceleration;
+	SetArrowColor(TurnOnAcceleration);
 }
 
 void ARacingPawn::SetAccelerateVector_Implementation(FVector2D MouseScreenPos)
 {
 	AccelerateDirection = (MouseScreenPos - BodyScreenPos).GetSafeNormal(0.0001);
+	if (VectorMesh && PawnBody)
+	{
+		auto TrueAccelDirection = FRotator(0, CameraArm->GetRelativeRotation().Yaw, 0).RotateVector(FVector(AccelerateDirection.Y, AccelerateDirection.X, 0));
+		auto AccelDirectionWorld = Root->GetComponentTransform().TransformVector(TrueAccelDirection);
+		VectorMesh->SetWorldRotation(FQuat::FindBetween(FVector::ForwardVector, AccelDirectionWorld));
+	}
 }
 
 void ARacingPawn::TurnPawnCamera_Implementation(bool IsCameraTurningOn)
@@ -32,21 +39,26 @@ void ARacingPawn::TurnPawnCamera_Implementation(bool IsCameraTurningOn)
 
 void ARacingPawn::ZoomPawnCamera_Implementation(float DeltaZoomValue)
 {
-	auto TempTargetArmLength = CameraArm->TargetArmLength + ZoomDeltaScale * DeltaZoomValue;
-	CameraArm->TargetArmLength = FMath::Clamp(TempTargetArmLength, MinCameraArmLength, MaxCameraArmLength);
+	if (CameraArm)
+	{
+		auto TempTargetArmLength = CameraArm->TargetArmLength + ZoomDeltaScale * DeltaZoomValue;
+		CameraArm->TargetArmLength = FMath::Clamp(TempTargetArmLength, MinCameraArmLength, MaxCameraArmLength);
+	}
 }
 
 void ARacingPawn::ComponentsInitializeBP(
 	USceneComponent* RootComp,
 	UCameraComponent* PawnCameraComp,
 	USpringArmComponent* CameraArmComp,
-	UStaticMeshComponent* PawnBodyComp
+	UStaticMeshComponent* PawnBodyComp,
+	USceneComponent* VectorMeshComp
 )
 {
 	Root = RootComp;
 	PawnCamera = PawnCameraComp;
 	CameraArm = CameraArmComp;
 	PawnBody = PawnBodyComp;
+	VectorMesh = VectorMeshComp;
 }
 
 void ARacingPawn::SetBodyScreenPos(FVector2D NewBodyPos)
@@ -58,8 +70,11 @@ void ARacingPawn::ApplyForces_Implementation()
 {
 	if (IsAccelerating)
 	{
-		auto TrueAccelDirection = FRotator(0, CameraArm->GetRelativeRotation().Yaw, 0).RotateVector(FVector(AccelerateDirection.Y, AccelerateDirection.X, 0));
-		PawnBody->AddForce(AccelerationMagnitude * TrueAccelDirection);
+		if (CameraArm && PawnBody)
+		{
+			auto TrueAccelDirection = FRotator(0, CameraArm->GetRelativeRotation().Yaw, 0).RotateVector(FVector(AccelerateDirection.Y, AccelerateDirection.X, 0));
+			PawnBody->AddForce(AccelerationMagnitude * TrueAccelDirection);
+		}
 	}
 }
 
@@ -67,8 +82,11 @@ void ARacingPawn::CameraArmTickMovement_Implementation()
 {
 	if (IsCameraTurning)
 	{
-		auto MouseDelta = Cast<AMyRacingPlayerControllerBase>(Controller)->GetMousePosXYDelta();
-		CameraArm->AddRelativeRotation(TurnDeltaScale * FRotator(MouseDelta.Y, MouseDelta.X, 0));
+		if (auto RacingPlayerController = Cast<AMyRacingPlayerControllerBase>(Controller))
+		{
+			auto MouseDelta = RacingPlayerController->GetMousePosXYDelta();
+			if (CameraArm) CameraArm->AddRelativeRotation(TurnDeltaScale * FRotator(MouseDelta.Y, MouseDelta.X, 0));
+		}
 	}
 }
 
