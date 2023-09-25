@@ -24,6 +24,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	virtual void BeginPlay() override;
+
 	UFUNCTION(BlueprintCallable, Category = "Provide Pawn with Info")
 	FVector2D GetBodyScreenPos(UStaticMeshComponent* BodyPawn);
 
@@ -36,7 +38,11 @@ public:
 	/// </summary>
 	class ARacingPawn* RacingPawn = nullptr;
 
-	void log();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pawn")
+	/// <summary>
+	/// Object reference to UI Widget. 
+	/// </summary>
+	class UUserWidget* Widget = nullptr;
 
 private:
 	UFUNCTION(BlueprintCallable, Category = "Inputs to Pawn")
@@ -71,4 +77,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Enhanced Input")
 	UInputAction* MouseMovementAction;
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> UserWidgetClass = nullptr;
 };

@@ -8,6 +8,7 @@
 #include "Logging/StructuredLog.h"
 #include "RacingPawn.h"
 #include "Kismet/GameplayStatics.h"
+#include "Blueprint/UserWidget.h"
 
 
 
@@ -68,6 +69,20 @@ void AMyRacingPlayerControllerBase::Tick(float DeltaTime)
 	}
 }
 
+void AMyRacingPlayerControllerBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (UserWidgetClass)
+	{
+		Widget = CreateWidget(this, UserWidgetClass, "RacingWidget");
+		if (Widget)
+		{
+			Widget->AddToViewport();
+		}
+	}
+}
+
 FVector2D AMyRacingPlayerControllerBase::GetBodyScreenPos(UStaticMeshComponent* BodyPawn)
 {
 	FVector2D ScreenPos = { 0, 0 };
@@ -100,9 +115,4 @@ void AMyRacingPlayerControllerBase::CameraTurn(const FInputActionValue& Value)
 void AMyRacingPlayerControllerBase::CameraZoom(const FInputActionValue& Value)
 {
 	RacingPawn->ZoomPawnCamera(Value.GetMagnitude());
-}
-
-void AMyRacingPlayerControllerBase::log()
-{
-
 }
