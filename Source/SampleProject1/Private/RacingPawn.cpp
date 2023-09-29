@@ -6,6 +6,8 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "MyRacingPlayerControllerBase.h"
+#include "RacingWaypointActor.h"
+#include "WaypointsCourseActor.h"
 
 // Sets default values
 ARacingPawn::ARacingPawn()
@@ -64,6 +66,15 @@ void ARacingPawn::ComponentsInitializeBP(
 void ARacingPawn::SetBodyScreenPos(FVector2D NewBodyPos)
 {
 	BodyScreenPos = NewBodyPos;
+}
+
+void ARacingPawn::OverlappedWaypoint(ARacingWaypointActor* OverlappedWaypointActor)
+{
+	auto RacingController = Cast<AMyRacingPlayerControllerBase>(Controller);
+	if (RacingController)
+	{
+		RacingController->OverlappedWaypoint(OverlappedWaypointActor);
+	}
 }
 
 void ARacingPawn::ApplyForces_Implementation()

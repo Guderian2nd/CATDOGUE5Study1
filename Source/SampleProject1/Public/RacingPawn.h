@@ -48,6 +48,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Initialization")
 	void SetBodyScreenPos(FVector2D NewBodyPos);
 
+	UFUNCTION(BlueprintCallable, Category = "Racing Waypoints")
+	void OverlappedWaypoint(class ARacingWaypointActor* OverlappedWaypointActor);
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

@@ -32,6 +32,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Provide Pawn with Info")
 	FVector2D GetMousePosXYDelta();
 
+	UFUNCTION(BlueprintCallable, Category = "Course Info")
+	class AWaypointsCourseActor* GetCourse();
+
+	UFUNCTION(BlueprintCallable, Category = "Course Info")
+	void OverlappedWaypoint(class ARacingWaypointActor* Waypoint);
+
+	UFUNCTION(BlueprintCallable, Category = "Course Info")
+	void SetCourse(AWaypointsCourseActor* NewCourse);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pawn")
 	/// <summary>
 	/// Object reference to Racing pawn. Null when not possessed.
@@ -42,7 +51,7 @@ public:
 	/// <summary>
 	/// Object reference to UI Widget. 
 	/// </summary>
-	class UUserWidget* Widget = nullptr;
+	class URacingWidgetBase* Widget = nullptr;
 
 private:
 	UFUNCTION(BlueprintCallable, Category = "Inputs to Pawn")
@@ -79,5 +88,18 @@ private:
 	UInputAction* MouseMovementAction;
 
 	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<UUserWidget> UserWidgetClass = nullptr;
+	TSubclassOf<URacingWidgetBase> UserWidgetClass = nullptr;
+
+	UPROPERTY(VisibleAnywhere, Category = "Course Info")
+	float RacingTime;
+
+	UPROPERTY(VisibleAnywhere, Category = "Course Info")
+	int CurrentWaypointNum;
+
+	UPROPERTY(VisibleAnywhere, Category = "Course Info")
+
+	int TotalWaypointsNum;
+
+	UPROPERTY(VisibleAnywhere, Category = "CourseActor")
+	class AWaypointsCourseActor* MyCourse = nullptr;
 };

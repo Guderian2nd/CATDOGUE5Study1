@@ -8,9 +8,8 @@
 #include "Logging/StructuredLog.h"
 #include "RacingPawn.h"
 #include "Kismet/GameplayStatics.h"
-#include "Blueprint/UserWidget.h"
-
-
+#include "RacingWidgetBase.h"
+#include "WaypointsCourseActor.h"
 
 void AMyRacingPlayerControllerBase::SetupInputComponent()
 {
@@ -67,6 +66,8 @@ void AMyRacingPlayerControllerBase::Tick(float DeltaTime)
 		RacingPawn->SetBodyScreenPos(GetBodyScreenPos(RacingPawn->PawnBody));
 		RacingPawn->SetAccelerateVector(FVector2D(MouseX, ViewPortSizeVec.Y - MouseY));
 	}
+
+	RacingTime += DeltaTime;
 }
 
 void AMyRacingPlayerControllerBase::BeginPlay()
@@ -75,12 +76,14 @@ void AMyRacingPlayerControllerBase::BeginPlay()
 
 	if (UserWidgetClass)
 	{
-		Widget = CreateWidget(this, UserWidgetClass, "RacingWidget");
+		Widget = Cast<URacingWidgetBase>(CreateWidget(this, UserWidgetClass, "RacingWidget"));
 		if (Widget)
 		{
 			Widget->AddToViewport();
 		}
 	}
+
+	RacingTime = 0.0f;
 }
 
 FVector2D AMyRacingPlayerControllerBase::GetBodyScreenPos(UStaticMeshComponent* BodyPawn)
@@ -98,6 +101,26 @@ FVector2D AMyRacingPlayerControllerBase::GetBodyScreenPos(UStaticMeshComponent* 
 FVector2D AMyRacingPlayerControllerBase::GetMousePosXYDelta()
 {
 	return EnhancedInputComp->GetBoundActionValue(MouseMovementAction).Get<FVector2D>();
+}
+
+AWaypointsCourseActor* AMyRacingPlayerControllerBase::GetCourse()
+{
+	return MyCourse;
+}
+
+void AMyRacingPlayerControllerBase::OverlappedWaypoint(ARacingWaypointActor* Waypoint)
+{
+	if (MyCourse->OverlappedWaypoint(Waypoint, CurrentWaypointNum))
+	{
+		CurrentWaypointNum++;
+	}
+}
+
+void AMyRacingPlayerControllerBase::SetCourse(AWaypointsCourseActor* NewCourse)
+{
+	MyCourse = NewCourse;
+	CurrentWaypointNum = 0;
+	TotalWaypointsNum = MyCourse->GetTotalWaypointsNum();
 }
 
 void AMyRacingPlayerControllerBase::Accelerate(const FInputActionValue& Value)
