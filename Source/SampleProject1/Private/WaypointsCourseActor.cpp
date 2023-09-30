@@ -26,6 +26,12 @@ int AWaypointsCourseActor::GetTotalWaypointsNum()
 	return Waypoints.Num();
 }
 
+ARacingWaypointActor* AWaypointsCourseActor::GetWaypoint(int Index)
+{
+	if (Waypoints.IsValidIndex(Index)) return Waypoints[Index];
+	else return nullptr;
+}
+
 // Called when the game starts or when spawned
 void AWaypointsCourseActor::BeginPlay()
 {
