@@ -21,6 +21,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Course Info")
 	int GetTotalWaypointsNum();
 
+	UFUNCTION(BlueprintCallable, Category = "Course Info")
+	ARacingWaypointActor* GetWaypoint(int Index);
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 

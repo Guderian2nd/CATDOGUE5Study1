@@ -10,6 +10,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "RacingWidgetBase.h"
 #include "WaypointsCourseActor.h"
+#include "RacingWaypointActor.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
+
 
 void AMyRacingPlayerControllerBase::SetupInputComponent()
 {
@@ -68,31 +71,45 @@ void AMyRacingPlayerControllerBase::Tick(float DeltaTime)
 	}
 
 	RacingTime += DeltaTime;
+	if (Widget)
+	{
+		Widget->SetTimerText(RacingTime);
+
+		FVector2D WaypointViewportCoord = {};
+		if (CurrentWaypointNum < TotalWaypointsNum)
+		{
+			UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition(this, MyCourse->GetWaypoint(CurrentWaypointNum)->GetActorLocation(), WaypointViewportCoord, true);
+
+			ProjectWorldLocationToScreen(MyCourse->GetWaypoint(CurrentWaypointNum)->GetActorLocation(), WaypointViewportCoord, true);
+
+			FVector2D ViewPortSizeVec = {};
+			GetLocalPlayer()->ViewportClient->GetViewportSize(ViewPortSizeVec);
+
+			bool IsWaypointInScreen = FVector2D::ZeroVector <= WaypointViewportCoord && WaypointViewportCoord <= ViewPortSizeVec;
+
+			auto CenteredCoord = WaypointViewportCoord - ViewPortSizeVec / 2;
+
+			UE_LOG(LogTemp, Warning, TEXT("%s"), *CenteredCoord.ToString());
+
+			Widget->SetArrowLoc(!IsWaypointInScreen, CenteredCoord);
+		}
+	}
 }
 
 void AMyRacingPlayerControllerBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (UserWidgetClass)
-	{
-		Widget = Cast<URacingWidgetBase>(CreateWidget(this, UserWidgetClass, "RacingWidget"));
-		if (Widget)
-		{
-			Widget->AddToViewport();
-		}
-	}
-
 	RacingTime = 0.0f;
 }
 
 FVector2D AMyRacingPlayerControllerBase::GetBodyScreenPos(UStaticMeshComponent* BodyPawn)
 {
-	FVector2D ScreenPos = { 0, 0 };
+	FVector2D ScreenPos = { };
 	auto tmp = BodyPawn->GetComponentLocation();
-	ProjectWorldLocationToScreen(tmp, ScreenPos);
+	ProjectWorldLocationToScreen(tmp, ScreenPos, true);
 
-	FVector2D ViewPortSizeVec = { 0, 0 };
+	FVector2D ViewPortSizeVec = { };
 	GetLocalPlayer()->ViewportClient->GetViewportSize(ViewPortSizeVec);
 
 	return FVector2D(ScreenPos.X, ViewPortSizeVec.Y - ScreenPos.Y);
@@ -113,6 +130,14 @@ void AMyRacingPlayerControllerBase::OverlappedWaypoint(ARacingWaypointActor* Way
 	if (MyCourse->OverlappedWaypoint(Waypoint, CurrentWaypointNum))
 	{
 		CurrentWaypointNum++;
+		if (Widget)
+		{
+			Widget->SetWaypointNum(CurrentWaypointNum, TotalWaypointsNum);
+		}
+		if (CurrentWaypointNum == TotalWaypointsNum)
+		{
+			Widget->SetArrowVisibility(false);
+		}
 	}
 }
 
@@ -121,6 +146,17 @@ void AMyRacingPlayerControllerBase::SetCourse(AWaypointsCourseActor* NewCourse)
 	MyCourse = NewCourse;
 	CurrentWaypointNum = 0;
 	TotalWaypointsNum = MyCourse->GetTotalWaypointsNum();
+
+	if (UserWidgetClass)
+	{
+		Widget = Cast<URacingWidgetBase>(CreateWidget(this, UserWidgetClass, "RacingWidget"));
+		if (Widget)
+		{
+			Widget->AddToViewport();
+			Widget->SetArrowVisibility(true);
+			Widget->SetWaypointNum(CurrentWaypointNum, TotalWaypointsNum);
+		}
+	}
 }
 
 void AMyRacingPlayerControllerBase::Accelerate(const FInputActionValue& Value)
