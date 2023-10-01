@@ -71,6 +71,7 @@ void AMyRacingPlayerControllerBase::Tick(float DeltaTime)
 	}
 
 	RacingTime += DeltaTime;
+
 	if (Widget)
 	{
 		Widget->SetTimerText(RacingTime);
@@ -78,20 +79,37 @@ void AMyRacingPlayerControllerBase::Tick(float DeltaTime)
 		FVector2D WaypointViewportCoord = {};
 		if (CurrentWaypointNum < TotalWaypointsNum)
 		{
-			UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition(this, MyCourse->GetWaypoint(CurrentWaypointNum)->GetActorLocation(), WaypointViewportCoord, true);
-
-			ProjectWorldLocationToScreen(MyCourse->GetWaypoint(CurrentWaypointNum)->GetActorLocation(), WaypointViewportCoord, true);
-
 			FVector2D ViewPortSizeVec = {};
 			GetLocalPlayer()->ViewportClient->GetViewportSize(ViewPortSizeVec);
 
-			bool IsWaypointInScreen = FVector2D::ZeroVector <= WaypointViewportCoord && WaypointViewportCoord <= ViewPortSizeVec;
+			bool IsWaypointOutOfScreen = true;
+
+			if (ProjectWorldLocationToScreen(MyCourse->GetWaypoint(CurrentWaypointNum)->GetActorLocation(), WaypointViewportCoord, true))
+			{ 
+				IsWaypointOutOfScreen = !(FVector2D::ZeroVector <= WaypointViewportCoord && WaypointViewportCoord <= ViewPortSizeVec);
+			}
+			else 
+			{
+				FVector CameraLoc = {};
+				FRotator CameraRot = {};
+				GetPlayerViewPoint(CameraLoc, CameraRot);
+
+				FTransform CameraTransform = FTransform(CameraRot, CameraLoc, FVector(1, 1, 1));
+
+				auto WaypointEyeCoordLocation = CameraTransform.InverseTransformPositionNoScale(MyCourse->GetWaypoint(CurrentWaypointNum)->GetActorLocation());
+				
+				WaypointEyeCoordLocation.X = -WaypointEyeCoordLocation.X;
+
+				auto NewWaypointWorldLoc = CameraTransform.TransformPositionNoScale(WaypointEyeCoordLocation);
+
+				ProjectWorldLocationToScreen(NewWaypointWorldLoc, WaypointViewportCoord, true);
+			}
 
 			auto CenteredCoord = WaypointViewportCoord - ViewPortSizeVec / 2;
 
 			UE_LOG(LogTemp, Warning, TEXT("%s"), *CenteredCoord.ToString());
 
-			Widget->SetArrowLoc(!IsWaypointInScreen, CenteredCoord);
+			Widget->SetArrowLoc(IsWaypointOutOfScreen, CenteredCoord);
 		}
 	}
 }
