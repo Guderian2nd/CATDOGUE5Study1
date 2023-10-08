@@ -16,7 +16,7 @@ public:
 	AWaypointsCourseActor();
 
 	UFUNCTION(BlueprintCallable, Category = "Update Waypoints")
-	bool OverlappedWaypoint(class ARacingWaypointActor* Waypoint, int CurrentWaypointNum);
+	bool IsOverlappedWaypointValid(class ARacingWaypointActor* Waypoint, int CurrentWaypointNum);
 
 	UFUNCTION(BlueprintCallable, Category = "Course Info")
 	int GetTotalWaypointsNum();

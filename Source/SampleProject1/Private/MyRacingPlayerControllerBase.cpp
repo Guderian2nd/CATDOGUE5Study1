@@ -146,19 +146,19 @@ FVector2D AMyRacingPlayerControllerBase::GetBodyScreenPos(UStaticMeshComponent* 
 	return FVector2D(ScreenPos.X, ViewPortSizeVec.Y - ScreenPos.Y);
 }
 
-FVector2D AMyRacingPlayerControllerBase::GetMousePosXYDelta()
+FVector2D AMyRacingPlayerControllerBase::GetMousePosXYDelta_Implementation()
 {
 	return EnhancedInputComp->GetBoundActionValue(MouseMovementAction).Get<FVector2D>();
 }
 
-AWaypointsCourseActor* AMyRacingPlayerControllerBase::GetCourse()
+AWaypointsCourseActor* AMyRacingPlayerControllerBase::GetCourse_Implementation()
 {
 	return MyCourse;
 }
 
-void AMyRacingPlayerControllerBase::OverlappedWaypoint(ARacingWaypointActor* Waypoint)
+void AMyRacingPlayerControllerBase::OverlappedWaypoint_Implementation(ARacingWaypointActor* Waypoint)
 {
-	if (MyCourse->OverlappedWaypoint(Waypoint, CurrentWaypointNum))
+	if (MyCourse->IsOverlappedWaypointValid(Waypoint, CurrentWaypointNum))
 	{
 		CurrentWaypointNum++;
 		if (Widget)
@@ -173,7 +173,7 @@ void AMyRacingPlayerControllerBase::OverlappedWaypoint(ARacingWaypointActor* Way
 	}
 }
 
-void AMyRacingPlayerControllerBase::SetCourse(AWaypointsCourseActor* NewCourse)
+void AMyRacingPlayerControllerBase::SetCourse_Implementation(AWaypointsCourseActor* NewCourse)
 {
 	MyCourse = NewCourse;
 	CurrentWaypointNum = 0;

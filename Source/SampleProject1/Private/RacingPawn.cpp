@@ -5,8 +5,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "MyRacingPlayerControllerBase.h"
-#include "RacingWaypointActor.h"
+#include "RacingControllerInterface.h"
 #include "WaypointsCourseActor.h"
 
 // Sets default values
@@ -68,12 +67,11 @@ void ARacingPawn::SetBodyScreenPos(FVector2D NewBodyPos)
 	BodyScreenPos = NewBodyPos;
 }
 
-void ARacingPawn::OverlappedWaypoint(ARacingWaypointActor* OverlappedWaypointActor)
+void ARacingPawn::OverlappedWaypoint_Implementation(ARacingWaypointActor* OverlappedWaypointActor)
 {
-	auto RacingController = Cast<AMyRacingPlayerControllerBase>(Controller);
-	if (RacingController)
+	if (Controller->Implements<URacingControllerInterface>())
 	{
-		RacingController->OverlappedWaypoint(OverlappedWaypointActor);
+		IRacingControllerInterface::Execute_OverlappedWaypoint(Controller, OverlappedWaypointActor);
 	}
 }
 
@@ -93,9 +91,9 @@ void ARacingPawn::CameraArmTickMovement_Implementation()
 {
 	if (IsCameraTurning)
 	{
-		if (auto RacingPlayerController = Cast<AMyRacingPlayerControllerBase>(Controller))
+		if (Controller->Implements<URacingControllerInterface>())
 		{
-			auto MouseDelta = RacingPlayerController->GetMousePosXYDelta();
+			auto MouseDelta = IRacingControllerInterface::Execute_GetMousePosXYDelta(Controller);
 			if (CameraArm) CameraArm->AddRelativeRotation(TurnDeltaScale * FRotator(MouseDelta.Y, MouseDelta.X, 0));
 		}
 	}

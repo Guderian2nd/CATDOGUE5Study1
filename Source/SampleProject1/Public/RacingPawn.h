@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "RacingPawnInterface.h"
 #include "RacingPawn.generated.h"
 
 UCLASS()
-class SAMPLEPROJECT1_API ARacingPawn : public APawn
+class SAMPLEPROJECT1_API ARacingPawn : public APawn, public IRacingPawnInterface
 {
 	GENERATED_BODY()
 
@@ -48,9 +49,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Initialization")
 	void SetBodyScreenPos(FVector2D NewBodyPos);
 
-	UFUNCTION(BlueprintCallable, Category = "Racing Waypoints")
-	void OverlappedWaypoint(class ARacingWaypointActor* OverlappedWaypointActor);
-
+#pragma region Interfaces
+	void OverlappedWaypoint_Implementation(ARacingWaypointActor* OverlappedWaypointActor) override;
+#pragma endregion
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
