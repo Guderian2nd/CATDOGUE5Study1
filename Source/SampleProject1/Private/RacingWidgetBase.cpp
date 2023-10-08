@@ -18,3 +18,7 @@ void URacingWidgetBase::SetTimerText_Implementation(float TimeInSeconds)
 void URacingWidgetBase::SetWaypointNum_Implementation(int AcquiredWaypointNum, int TotalWaypointNum)
 {
 }
+
+void URacingWidgetBase::ToggleVictoryMessage_Implementation(bool IsRaceFinished, float FinalTime)
+{
+}

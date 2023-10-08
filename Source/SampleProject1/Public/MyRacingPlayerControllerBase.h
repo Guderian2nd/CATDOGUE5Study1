@@ -24,6 +24,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void UpdateWidget(float DeltaTime);
+
+	void UpdatePawnForceArrow();
+
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable, Category = "Provide Pawn with Info")
