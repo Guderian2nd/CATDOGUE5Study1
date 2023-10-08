@@ -58,59 +58,72 @@ void AMyRacingPlayerControllerBase::OnUnPossess()
 
 void AMyRacingPlayerControllerBase::Tick(float DeltaTime)
 {
+	UpdatePawnForceArrow();
+
+	UpdateWidget(DeltaTime);
+}
+
+void AMyRacingPlayerControllerBase::UpdateWidget(float DeltaTime)
+{
+	if (CurrentWaypointNum < TotalWaypointsNum)
+	{
+		RacingTime += DeltaTime;
+
+		if (Widget)
+		{
+			Widget->SetTimerText(RacingTime);
+
+			FVector2D WaypointViewportCoord = {};
+			if (CurrentWaypointNum < TotalWaypointsNum)
+			{
+				FVector2D ViewPortSizeVec = {};
+				GetLocalPlayer()->ViewportClient->GetViewportSize(ViewPortSizeVec);
+
+				bool IsWaypointOutOfScreen = true;
+
+				if (ProjectWorldLocationToScreen(MyCourse->GetWaypoint(CurrentWaypointNum)->GetActorLocation(), WaypointViewportCoord, true))
+				{
+					IsWaypointOutOfScreen = !(WaypointViewportCoord.ComponentwiseAllGreaterOrEqual(FVector2D::ZeroVector) && WaypointViewportCoord.ComponentwiseAllLessOrEqual(ViewPortSizeVec));
+				}
+				else
+				{
+					FVector CameraLoc = {};
+					FRotator CameraRot = {};
+					GetPlayerViewPoint(CameraLoc, CameraRot);
+
+					FTransform CameraTransform = FTransform(CameraRot, CameraLoc, FVector(1, 1, 1));
+
+					auto WaypointEyeCoordLocation = CameraTransform.InverseTransformPositionNoScale(MyCourse->GetWaypoint(CurrentWaypointNum)->GetActorLocation());
+
+					WaypointEyeCoordLocation.X = -WaypointEyeCoordLocation.X;
+
+					auto NewWaypointWorldLoc = CameraTransform.TransformPositionNoScale(WaypointEyeCoordLocation);
+
+					ProjectWorldLocationToScreen(NewWaypointWorldLoc, WaypointViewportCoord, true);
+				}
+
+				auto CenteredCoord = WaypointViewportCoord - ViewPortSizeVec / 2;
+
+				UE_LOG(LogTemp, Warning, TEXT("%s"), *CenteredCoord.ToString());
+
+				Widget->SetArrowLoc(IsWaypointOutOfScreen, CenteredCoord);
+			}
+		}
+	}
+}
+
+void AMyRacingPlayerControllerBase::UpdatePawnForceArrow()
+{
 	if (RacingPawn)
 	{
 		float MouseX, MouseY = 0.0f;
 		GetMousePosition(MouseX, MouseY);
 		FVector2D ViewPortSizeVec = { 0, 0 };
-		
+
 		GetLocalPlayer()->ViewportClient->GetViewportSize(ViewPortSizeVec);
 
 		RacingPawn->SetBodyScreenPos(GetBodyScreenPos(RacingPawn->PawnBody));
 		RacingPawn->SetAccelerateVector(FVector2D(MouseX, ViewPortSizeVec.Y - MouseY));
-	}
-
-	RacingTime += DeltaTime;
-
-	if (Widget)
-	{
-		Widget->SetTimerText(RacingTime);
-
-		FVector2D WaypointViewportCoord = {};
-		if (CurrentWaypointNum < TotalWaypointsNum)
-		{
-			FVector2D ViewPortSizeVec = {};
-			GetLocalPlayer()->ViewportClient->GetViewportSize(ViewPortSizeVec);
-
-			bool IsWaypointOutOfScreen = true;
-
-			if (ProjectWorldLocationToScreen(MyCourse->GetWaypoint(CurrentWaypointNum)->GetActorLocation(), WaypointViewportCoord, true))
-			{ 
-				IsWaypointOutOfScreen = !(FVector2D::ZeroVector <= WaypointViewportCoord && WaypointViewportCoord <= ViewPortSizeVec);
-			}
-			else 
-			{
-				FVector CameraLoc = {};
-				FRotator CameraRot = {};
-				GetPlayerViewPoint(CameraLoc, CameraRot);
-
-				FTransform CameraTransform = FTransform(CameraRot, CameraLoc, FVector(1, 1, 1));
-
-				auto WaypointEyeCoordLocation = CameraTransform.InverseTransformPositionNoScale(MyCourse->GetWaypoint(CurrentWaypointNum)->GetActorLocation());
-				
-				WaypointEyeCoordLocation.X = -WaypointEyeCoordLocation.X;
-
-				auto NewWaypointWorldLoc = CameraTransform.TransformPositionNoScale(WaypointEyeCoordLocation);
-
-				ProjectWorldLocationToScreen(NewWaypointWorldLoc, WaypointViewportCoord, true);
-			}
-
-			auto CenteredCoord = WaypointViewportCoord - ViewPortSizeVec / 2;
-
-			UE_LOG(LogTemp, Warning, TEXT("%s"), *CenteredCoord.ToString());
-
-			Widget->SetArrowLoc(IsWaypointOutOfScreen, CenteredCoord);
-		}
 	}
 }
 
@@ -155,6 +168,7 @@ void AMyRacingPlayerControllerBase::OverlappedWaypoint(ARacingWaypointActor* Way
 		if (CurrentWaypointNum == TotalWaypointsNum)
 		{
 			Widget->SetArrowVisibility(false);
+			Widget->ToggleVictoryMessage(true, RacingTime);
 		}
 	}
 }

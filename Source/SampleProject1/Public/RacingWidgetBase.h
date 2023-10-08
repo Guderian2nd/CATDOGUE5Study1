@@ -30,4 +30,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Controller Communication")
 	void SetWaypointNum(int AcquiredWaypointNum, int TotalWaypointNum);
 	virtual void SetWaypointNum_Implementation(int AcquiredWaypointNum, int TotalWaypointNum);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Controller Communication")
+	void ToggleVictoryMessage(bool IsRaceFinished, float FinalTime);
+	virtual void ToggleVictoryMessage_Implementation(bool IsRaceFinished, float FinalTime);
 };
