@@ -31,10 +31,9 @@ void ARacingGameModeBase::AssignCoursesToPlayerControllers_Implementation()
 
 	for (auto i = 0; i < PlayerControllers.Num(); ++i)
 	{
-		auto RacingPlayerController = Cast<AMyRacingPlayerControllerBase>(PlayerControllers[i]);
-		if (RacingPlayerController && Courses.Num() > 0)
+		if (PlayerControllers[i]->Implements<URacingControllerInterface>() && Courses.Num() > 0)
 		{
-			RacingPlayerController->SetCourse(Courses[i % Courses.Num()]);
+			IRacingControllerInterface::Execute_SetCourse(PlayerControllers[i], Courses[i % Courses.Num()]);
 		}
 	}
 }

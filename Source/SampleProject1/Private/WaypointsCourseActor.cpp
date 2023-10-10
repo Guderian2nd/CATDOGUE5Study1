@@ -12,7 +12,7 @@ AWaypointsCourseActor::AWaypointsCourseActor()
 
 }
 
-bool AWaypointsCourseActor::OverlappedWaypoint(ARacingWaypointActor* Waypoint, int CurrentWaypointNum)
+bool AWaypointsCourseActor::IsOverlappedWaypointValid(ARacingWaypointActor* Waypoint, int CurrentWaypointNum)
 {
 	if (CurrentWaypointNum < Waypoints.Num())
 	{

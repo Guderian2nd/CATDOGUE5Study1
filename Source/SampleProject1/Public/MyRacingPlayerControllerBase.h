@@ -5,13 +5,14 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "InputActionValue.h"
+#include "RacingControllerInterface.h"
 #include "MyRacingPlayerControllerBase.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SAMPLEPROJECT1_API AMyRacingPlayerControllerBase : public APlayerController
+class SAMPLEPROJECT1_API AMyRacingPlayerControllerBase : public APlayerController, public IRacingControllerInterface
 {
 	GENERATED_BODY()
 	
@@ -33,17 +34,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Provide Pawn with Info")
 	FVector2D GetBodyScreenPos(UStaticMeshComponent* BodyPawn);
 
-	UFUNCTION(BlueprintCallable, Category = "Provide Pawn with Info")
-	FVector2D GetMousePosXYDelta();
+#pragma region Interfaces
+	FVector2D GetMousePosXYDelta_Implementation() override;
 
-	UFUNCTION(BlueprintCallable, Category = "Course Info")
-	class AWaypointsCourseActor* GetCourse();
+	AWaypointsCourseActor* GetCourse_Implementation() override;
+	void OverlappedWaypoint_Implementation(class ARacingWaypointActor* Waypoint) override;
+	void SetCourse_Implementation(AWaypointsCourseActor* NewCourse) override;
+#pragma endregion
 
-	UFUNCTION(BlueprintCallable, Category = "Course Info")
-	void OverlappedWaypoint(class ARacingWaypointActor* Waypoint);
-
-	UFUNCTION(BlueprintCallable, Category = "Course Info")
-	void SetCourse(AWaypointsCourseActor* NewCourse);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pawn")
 	/// <summary>
