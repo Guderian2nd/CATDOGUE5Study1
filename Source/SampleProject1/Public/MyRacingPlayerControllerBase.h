@@ -53,7 +53,7 @@ public:
 	/// <summary>
 	/// Object reference to UI Widget. 
 	/// </summary>
-	class URacingWidgetBase* Widget = nullptr;
+	UUserWidget* Widget = nullptr;
 
 private:
 	UFUNCTION(BlueprintCallable, Category = "Inputs to Pawn")
@@ -90,7 +90,7 @@ private:
 	UInputAction* MouseMovementAction;
 
 	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<URacingWidgetBase> UserWidgetClass = nullptr;
+	TSubclassOf<class URacingWidgetBase> UserWidgetClass = nullptr;
 
 	UPROPERTY(VisibleAnywhere, Category = "Course Info")
 	float RacingTime;

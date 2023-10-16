@@ -13,7 +13,6 @@
 #include "RacingWaypointActor.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 
-
 void AMyRacingPlayerControllerBase::SetupInputComponent()
 {
 	Super::SetupInputComponent();
@@ -71,7 +70,7 @@ void AMyRacingPlayerControllerBase::UpdateWidget(float DeltaTime)
 
 		if (Widget)
 		{
-			Widget->SetTimerText(RacingTime);
+			IRacingWidgetInterface::Execute_SetTimerText(Widget, RacingTime);
 
 			FVector2D WaypointViewportCoord = {};
 			if (CurrentWaypointNum < TotalWaypointsNum)
@@ -106,7 +105,7 @@ void AMyRacingPlayerControllerBase::UpdateWidget(float DeltaTime)
 
 				UE_LOG(LogTemp, Warning, TEXT("%s"), *CenteredCoord.ToString());
 
-				Widget->SetArrowLoc(IsWaypointOutOfScreen, CenteredCoord);
+				IRacingWidgetInterface::Execute_SetArrowLoc(Widget, IsWaypointOutOfScreen, CenteredCoord);
 			}
 		}
 	}
@@ -163,12 +162,12 @@ void AMyRacingPlayerControllerBase::OverlappedWaypoint_Implementation(ARacingWay
 		CurrentWaypointNum++;
 		if (Widget)
 		{
-			Widget->SetWaypointNum(CurrentWaypointNum, TotalWaypointsNum);
+			IRacingWidgetInterface::Execute_SetWaypointNum(Widget, CurrentWaypointNum, TotalWaypointsNum);
 		}
 		if (CurrentWaypointNum == TotalWaypointsNum)
 		{
-			Widget->SetArrowVisibility(false);
-			Widget->ToggleVictoryMessage(true, RacingTime);
+			IRacingWidgetInterface::Execute_SetArrowVisibility(Widget, false);
+			IRacingWidgetInterface::Execute_ToggleVictoryMessage(Widget, true, RacingTime);
 		}
 	}
 }
@@ -181,12 +180,14 @@ void AMyRacingPlayerControllerBase::SetCourse_Implementation(AWaypointsCourseAct
 
 	if (UserWidgetClass)
 	{
-		Widget = Cast<URacingWidgetBase>(CreateWidget(this, UserWidgetClass, "RacingWidget"));
+		Widget = CreateWidget(this, UserWidgetClass, "RacingWidget");
 		if (Widget)
 		{
 			Widget->AddToViewport();
-			Widget->SetArrowVisibility(true);
-			Widget->SetWaypointNum(CurrentWaypointNum, TotalWaypointsNum);
+
+			IRacingWidgetInterface::Execute_SetArrowVisibility(Widget, true);
+			IRacingWidgetInterface::Execute_SetWaypointNum(Widget, CurrentWaypointNum, TotalWaypointsNum);
+			IRacingWidgetInterface::Execute_ToggleVictoryMessage(Widget, false, 0.0f);
 		}
 	}
 }
