@@ -15,6 +15,15 @@ public:
 	// Sets default values for this actor's properties
 	ARacingWaypointActor();
 
+	UFUNCTION(BlueprintCallable)
+	void CallOverlappedWaypoint(
+		UPrimitiveComponent* OverlappedComponent, 
+		AActor* OtherActor, 
+		UPrimitiveComponent* OtherComp, 
+		int32 OtherBodyIndex, 
+		bool bFromSweep, 
+		const FHitResult& SweepResult
+	);
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -24,9 +33,14 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
-	UStaticMeshComponent* FlagMesh;
+	UStaticMeshComponent* FlagMesh = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
-	class UBoxComponent* WaypointCollisionBox;
+	class UBoxComponent* WaypointCollisionBox = nullptr;
+
+	FScriptDelegate OnCollisionBoxOverlap;
+
+private:
+	void BindEvents();
 
 };

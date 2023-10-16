@@ -27,7 +27,7 @@ public:
 
 	void UpdateWidget(float DeltaTime);
 
-	void UpdatePawnForceArrow();
+	void UpdatePawnForceArrow(float DeltaTime);
 
 	virtual void BeginPlay() override;
 
@@ -42,7 +42,6 @@ public:
 	void SetCourse_Implementation(AWaypointsCourseActor* NewCourse) override;
 #pragma endregion
 
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pawn")
 	/// <summary>
 	/// Object reference to Racing pawn. Null when not possessed.
@@ -54,6 +53,8 @@ public:
 	/// Object reference to UI Widget. 
 	/// </summary>
 	UUserWidget* Widget = nullptr;
+
+	DECLARE_MULTICAST_DELEGATE_OneParam(FRacingControllerTick, float);
 
 private:
 	UFUNCTION(BlueprintCallable, Category = "Inputs to Pawn")
@@ -99,9 +100,12 @@ private:
 	int CurrentWaypointNum;
 
 	UPROPERTY(VisibleAnywhere, Category = "Course Info")
-
 	int TotalWaypointsNum;
 
 	UPROPERTY(VisibleAnywhere, Category = "CourseActor")
 	class AWaypointsCourseActor* MyCourse = nullptr;
+
+	FRacingControllerTick OnTick;
+
+	FDelegateHandle WidgetUpdateDelegateHandle;
 };

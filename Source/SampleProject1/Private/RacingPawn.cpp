@@ -13,12 +13,19 @@ ARacingPawn::ARacingPawn()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 void ARacingPawn::AcceleratePawn_Implementation(bool TurnOnAcceleration)
 {
-	IsAccelerating = TurnOnAcceleration;
+	if (TurnOnAcceleration)
+	{
+		OnTick.Remove(AccelerationDelegateHandle);
+		AccelerationDelegateHandle = OnTick.AddUObject(this, &ARacingPawn::ApplyForces);
+	}
+	else
+	{
+		OnTick.Remove(AccelerationDelegateHandle);
+	}
 	SetArrowColor(TurnOnAcceleration);
 }
 
@@ -35,7 +42,15 @@ void ARacingPawn::SetAccelerateVector_Implementation(FVector2D MouseScreenPos)
 
 void ARacingPawn::TurnPawnCamera_Implementation(bool IsCameraTurningOn)
 {
-	IsCameraTurning = IsCameraTurningOn;
+	if (IsCameraTurningOn)
+	{
+		OnTick.Remove(CameraArmMovementDelegateHandle);
+		CameraArmMovementDelegateHandle = OnTick.AddUObject(this, &ARacingPawn::CameraArmTickMovement);
+	}
+	else
+	{
+		OnTick.Remove(CameraArmMovementDelegateHandle);
+	}
 }
 
 void ARacingPawn::ZoomPawnCamera_Implementation(float DeltaZoomValue)
@@ -69,33 +84,24 @@ void ARacingPawn::SetBodyScreenPos(FVector2D NewBodyPos)
 
 void ARacingPawn::OverlappedWaypoint_Implementation(ARacingWaypointActor* OverlappedWaypointActor)
 {
+	IRacingControllerInterface::Execute_OverlappedWaypoint(Controller, OverlappedWaypointActor);
+}
+
+void ARacingPawn::ApplyForces_Implementation(float DeltaTime)
+{
+	if (CameraArm && PawnBody)
+	{
+		auto TrueAccelDirection = FRotator(0, CameraArm->GetRelativeRotation().Yaw, 0).RotateVector(FVector(AccelerateDirection.Y, AccelerateDirection.X, 0));
+		PawnBody->AddForce(AccelerationMagnitude * TrueAccelDirection);
+	}
+}
+
+void ARacingPawn::CameraArmTickMovement_Implementation(float DeltaTime)
+{
 	if (Controller->Implements<URacingControllerInterface>())
 	{
-		IRacingControllerInterface::Execute_OverlappedWaypoint(Controller, OverlappedWaypointActor);
-	}
-}
-
-void ARacingPawn::ApplyForces_Implementation()
-{
-	if (IsAccelerating)
-	{
-		if (CameraArm && PawnBody)
-		{
-			auto TrueAccelDirection = FRotator(0, CameraArm->GetRelativeRotation().Yaw, 0).RotateVector(FVector(AccelerateDirection.Y, AccelerateDirection.X, 0));
-			PawnBody->AddForce(AccelerationMagnitude * TrueAccelDirection);
-		}
-	}
-}
-
-void ARacingPawn::CameraArmTickMovement_Implementation()
-{
-	if (IsCameraTurning)
-	{
-		if (Controller->Implements<URacingControllerInterface>())
-		{
-			auto MouseDelta = IRacingControllerInterface::Execute_GetMousePosXYDelta(Controller);
-			if (CameraArm) CameraArm->AddRelativeRotation(TurnDeltaScale * FRotator(MouseDelta.Y, MouseDelta.X, 0));
-		}
+		auto MouseDelta = IRacingControllerInterface::Execute_GetMousePosXYDelta(Controller);
+		if (CameraArm) CameraArm->AddRelativeRotation(TurnDeltaScale * FRotator(MouseDelta.Y, MouseDelta.X, 0));
 	}
 }
 
@@ -104,8 +110,7 @@ void ARacingPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	ApplyForces();
-	CameraArmTickMovement();
+	OnTick.Broadcast(DeltaTime);
 }
 
 /**
