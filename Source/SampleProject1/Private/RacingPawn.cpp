@@ -19,12 +19,16 @@ void ARacingPawn::AcceleratePawn_Implementation(bool TurnOnAcceleration)
 {
 	if (TurnOnAcceleration)
 	{
-		OnTick.Remove(AccelerationDelegateHandle);
-		AccelerationDelegateHandle = OnTick.AddUObject(this, &ARacingPawn::ApplyForces);
+		AccelerationScriptDelegate.Clear();
+		AccelerationScriptDelegate.BindUFunction(this, TEXT("ApplyForces"));
+		OnTick.Add(AccelerationScriptDelegate);
+		//OnTick.Remove(AccelerationDelegateHandle);
+		//AccelerationDelegateHandle = OnTick.AddUObject(this, &ARacingPawn::ApplyForces);
 	}
 	else
 	{
-		OnTick.Remove(AccelerationDelegateHandle);
+		OnTick.Remove(AccelerationScriptDelegate);
+		//OnTick.Remove(AccelerationDelegateHandle);
 	}
 	SetArrowColor(TurnOnAcceleration);
 }
@@ -44,12 +48,16 @@ void ARacingPawn::TurnPawnCamera_Implementation(bool IsCameraTurningOn)
 {
 	if (IsCameraTurningOn)
 	{
-		OnTick.Remove(CameraArmMovementDelegateHandle);
-		CameraArmMovementDelegateHandle = OnTick.AddUObject(this, &ARacingPawn::CameraArmTickMovement);
+		CameraArmMovementScriptDelegate.Clear();
+		CameraArmMovementScriptDelegate.BindUFunction(this, TEXT("CameraArmTickMovement"));
+		OnTick.Add(CameraArmMovementScriptDelegate);
+		//OnTick.Remove(AccelerationDelegateHandle);
+		//AccelerationDelegateHandle = OnTick.AddUObject(this, &ARacingPawn::ApplyForces);
 	}
 	else
 	{
-		OnTick.Remove(CameraArmMovementDelegateHandle);
+		OnTick.Remove(CameraArmMovementScriptDelegate);
+		//OnTick.Remove(AccelerationDelegateHandle);
 	}
 }
 

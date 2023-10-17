@@ -88,7 +88,8 @@ public:
 	/// </summary>
 	USceneComponent* VectorMesh;
 
-	DECLARE_MULTICAST_DELEGATE_OneParam(FRacingPawnTick, float);
+	UDELEGATE(BlueprintCallable)
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRacingPawnTick, float /* DeltaTime */ , DeltaTime);
 
 protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Pawn Movement")
@@ -98,6 +99,9 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Pawn Movement")
 	void CameraArmTickMovement(float DeltaTime);
 	virtual void CameraArmTickMovement_Implementation(float DeltaTime);
+
+	UPROPERTY(BlueprintAssignable, Category = "Delegates")
+	FRacingPawnTick OnTick;
 
 private:
 	UPROPERTY(EditAnywhere)
@@ -126,8 +130,6 @@ private:
 	bool IsAccelerating = false;
 	bool IsCameraTurning = false;
 
-	FRacingPawnTick OnTick;
-
-	FDelegateHandle AccelerationDelegateHandle;
-	FDelegateHandle CameraArmMovementDelegateHandle;
+	FScriptDelegate AccelerationScriptDelegate;
+	FScriptDelegate CameraArmMovementScriptDelegate;
 };
